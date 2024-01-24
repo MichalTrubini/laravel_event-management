@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\{Event, User};
 
 class EventSeeder extends Seeder
 {
@@ -12,6 +13,14 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $users = User::all();
+
+        for ($i = 0; $i < 200; $i++) {
+            $user = $users->random();
+            Event::factory()->create([
+                'user_id' => $user->id,
+            ]);
+
+        }
     }
 }

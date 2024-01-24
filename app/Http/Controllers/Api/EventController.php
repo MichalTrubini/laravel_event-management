@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class EventController extends Controller
 {
@@ -12,7 +13,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        return Event::all();
     }
 
     /**
@@ -20,7 +21,19 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+        ]);
+    
+        // Add user_id to the validated data
+        $validatedData['user_id'] = 1;
+    
+        $event = Event::create($validatedData);
+    
+        return $event;
     }
 
     /**
@@ -28,7 +41,7 @@ class EventController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return $event = Event::find($id);
     }
 
     /**
