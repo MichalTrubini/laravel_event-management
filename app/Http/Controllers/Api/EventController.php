@@ -7,13 +7,17 @@ use App\Http\Resources\EventResource;
 use App\Http\Traits\CanLoadRelationships;
 use Illuminate\Http\Request;
 use App\Models\Event;
+use Illuminate\Support\Facades\Gate;
 
 class EventController extends Controller
 {
-
     use CanLoadRelationships;
 
     private $relations = ['user', 'attendees', 'attendees.user'];
+
+    public function __construct() {
+        $this->middleware('auth:sanctum')->except(['index', 'show']);
+    }
 
     public function index()
     {   
@@ -32,7 +36,7 @@ class EventController extends Controller
         ]);
     
         // Add user_id to the validated data
-        $validatedData['user_id'] = 1;
+        $validatedData['user_id'] = $request->user()->id;
     
         $event = Event::create($validatedData);
     
@@ -52,6 +56,12 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
+        // Check if the user is authorized to update the event
+/*         if(Gate::denies('update-event', $event)){
+            abort(403, 'You are not authorised to update this event');
+        } */
+
+        $this->authorize('update-event', $event);
 
         $event->update($request->validate([
             'name' => 'sometimes|string|max:255',
@@ -60,7 +70,7 @@ class EventController extends Controller
             'end_date' => 'sometimes|date|after:start_date',
         ]));
 
-        new EventResource($this->loadRelationships($event));
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
